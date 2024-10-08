@@ -1,7 +1,6 @@
 
 
-[![Paper](https://img.shields.io/badge/Paper-%20%F0%9F%93%84-blue)](https://openreview.net/forum?id=ww7JqIf494)
-[![Website](https://img.shields.io/badge/Website-%F0%9F%8C%90-orange)](https://gsalerts-cyber.github.io/sketch-to-skill/)
+
 
 ## Clone and compile
 
@@ -20,12 +19,12 @@ Extract the downloaded mujoco210 directory into `~/.mujoco/mujoco210`.
 
 ### Create conda env
 
-First create a conda env with name `ibrl`.
+First create a conda env with name `sts`.
 ```shell
-conda create --name ibrl python=3.9
+conda create --name sts python=3.9
 ```
 
-Then, source `set_env.sh` to activate `ibrl` conda env. It also setup several important paths such as `MUJOCO_PY_MUJOCO_PATH` and add current project folder to `PYTHONPATH`.
+Then, source `set_env.sh` to activate `sts` conda env. It also setup several important paths such as `MUJOCO_PY_MUJOCO_PATH` and add current project folder to `PYTHONPATH`.
 Note that if the conda env has a different name, you will need to manually modify the `set_env.sh`.
 You also need to modify the `set_env.sh` if the mujoco is not installed at the default location.
 
@@ -71,164 +70,38 @@ ln -sf /lib/x86_64-linux-gnu/libstdc++.so.6 PATH_TO_CONDA_ENV/bin/../lib/libstdc
 Remember to run `source set_env.sh`  once per shell before running any script from this repo.
 
 
-### Download data and BC models
-
-Download dataset and models from [Google Drive](https://drive.google.com/file/d/1F2yH84Iqv0qRPmfH8o-kSzgtfaoqMzWE/view?usp=sharing) and put the folders under `release` folder.
-The release folder should contain `release/cfgs` (already shipped with the repo), `release/data` and `release/model` (the latter two are from the downloaded zip file).
 
 
-### Robomimic (pixel)
 
-Train RL policy using the BC policy provided in `release` folder
 
-#### IBRL
-
-```shell
-# can
-python train_rl.py --config_path release/cfgs/robomimic_rl/can_ibrl.yaml
-
-# square
-python train_rl.py --config_path release/cfgs/robomimic_rl/square_ibrl.yaml
-```
-
-Use `--save_dir PATH` to specify where to store the logs and models.
-Use `--use_wb 0` to disable logging to weight and bias.
-
-Use the following commands to train a BC policy from scratch.
-We find that IBRL is not sensitive to the exact performance of the BC policy.
-```shell
-# can
-python train_bc.py --config_path release/cfgs/robomimic_bc/can.yaml
-
-# square
-python train_bc.py --config_path release/cfgs/robomimic_bc/square.yaml
-```
-
-#### RLPD
-
-```shell
-# can
-python train_rl.py --config_path release/cfgs/robomimic_rl/can_rlpd.yaml
-
-# square
-python train_rl.py --config_path release/cfgs/robomimic_rl/square_rlpd.yaml
-```
-
-#### RFT (Regularized Fine-Tuning)
-
-These commands run RFT from pretrained models in `release` folder.
-```shell
-# can rft
-python train_rl.py --config_path release/cfgs/robomimic_rl/can_rft.yaml
-
-# square rft
-python train_rl.py --config_path release/cfgs/robomimic_rl/square_rft.yaml
-```
-
-To only perform pretraining:
-```shell
-# can, pretraining for 5 x 10,000 steps
-python train_rl.py --config_path release/cfgs/robomimic_rl/can_rft.yaml --pretrain_only 1 --pretrain_num_epoch 5 --load_pretrained_agent None
-
-# square, pretraining for 10 x 10,000 steps
-python train_rl.py --config_path release/cfgs/robomimic_rl/square_rft.yaml --pretrain_only 1 --pretrain_num_epoch 10 --load_pretrained_agent None
-```
----
-
-### Robomimic (state)
-
-#### IBRL
-
-Train IBRL using the provided state BC policies:
-```shell
-# can state
-python train_rl.py --config_path release/cfgs/robomimic_rl/can_state_ibrl.yaml
-
-# square state
-python train_rl.py --config_path release/cfgs/robomimic_rl/square_state_ibrl.yaml
-```
-
-To train a state BC policy from scratch:
-```shell
-# can
-python train_bc.py --config_path release/cfgs/robomimic_bc/can_state.yaml
-
-# square
-python train_bc.py --config_path release/cfgs/robomimic_bc/square_state.yaml
-```
-
-#### RLPD
-
-```shell
-# can state
-python train_rl.py --config_path release/cfgs/robomimic_rl/can_state_rlpd.yaml
-
-# square state
-python train_rl.py --config_path release/cfgs/robomimic_rl/square_state_rlpd.yaml
-```
-
-#### RFT
-
-Since state policies are fast to train, we can just run pretrain and RL fine-tuning in one step.
-```shell
-# can
-python train_rl.py --config_path release/cfgs/robomimic_rl/can_state_rft.yaml
-
-# square
-python train_rl.py --config_path release/cfgs/robomimic_rl/square_state_rft.yaml
-```
----
 
 ### Metaworld
 
-#### IBRL
+#### sketch-to-skill
 
 Train RL policy using the BC policy provided in `release` folder
 ```shell
 # assembly
-python mw_main/train_rl_mw.py --config_path release/cfgs/metaworld/ibrl_basic.yaml --bc_policy assembly
+python mw_main/train_rl_mw_pofd.py --config_path release/cfgs/metaworld/ibrl_basic.yaml --bc_policy ButtonPress
 
-# boxclose
-python mw_main/train_rl_mw.py --config_path release/cfgs/metaworld/ibrl_basic.yaml --bc_policy boxclose
 
-# coffeepush
-python mw_main/train_rl_mw.py --config_path release/cfgs/metaworld/ibrl_basic.yaml --bc_policy coffeepush
-
-# stickpull
-python mw_main/train_rl_mw.py --config_path release/cfgs/metaworld/ibrl_basic.yaml --bc_policy stickpull
-```
 
 If you want to train BC policy from scratch
 ```shell
 python mw_main/train_bc_mw.py --dataset.path Assembly --save_dir SAVE_DIR
 ```
 
-#### RPLD
+#### IBRL
 
-Note that we still specify `bc_policy` to specify the task name, but we don't use it in baselines.
-This is special to `train_rl_mw.py`.
-
+Train RL policy using the BC policy provided in `release` folder
 ```shell
-python mw_main/train_rl_mw.py --config_path release/cfgs/metaworld/rlpd.yaml --bc_policy assembly --use_wb 0
-```
+# assembly
+python mw_main/train_rl_mw.py --config_path release/cfgs/metaworld/ibrl_basic.yaml --bc_policy ButtonPress
 
-#### RFT
 
-For simplicity, here this one command performs both pretraining and RL training.
+
+If you want to train BC policy from scratch
 ```shell
-python mw_main/train_rl_mw.py --config_path release/cfgs/metaworld/rft.yaml --bc_policy assembly --use_wb 0
+python mw_main/train_bc_mw.py --dataset.path Assembly --save_dir SAVE_DIR
 ```
----
 
-## Citation
-
-```
-@misc{hu2023imitation,
-    title={Imitation Bootstrapped Reinforcement Learning},
-    author={Hengyuan Hu and Suvir Mirchandani and Dorsa Sadigh},
-    year={2023},
-    eprint={2311.02198},
-    archivePrefix={arXiv},
-    primaryClass={cs.LG}
-}
-```
